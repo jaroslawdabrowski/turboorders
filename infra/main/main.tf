@@ -43,6 +43,37 @@ resource "aws_dynamodb_table" "app" {
   }
 }
 
+# --- SSM Parameter Store: Basic Auth credentials, managed from the AWS console ---
+# SecureString on the free default AWS-managed key (alias/aws/ssm) - not a customer-
+# managed KMS key, which would cost ~$1/mo for zero benefit here. `ignore_changes`
+# means Terraform seeds the value once (from var.security_username/password_hash,
+# themselves defaulted so routine applies never need to supply anything) and never
+# again overwrites whatever's actually in SSM - rotate the credential by editing the
+# parameter's value in the AWS console/CLI, then run `terraform apply` (no -var flags
+# needed) to push it into the Lambda's environment.
+resource "aws_ssm_parameter" "security_username" {
+  name  = "/${local.name}/security/username"
+  type  = "SecureString"
+  value = var.security_username
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "security_password_hash" {
+  name = "/${local.name}/security/password-hash"
+  type = "SecureString"
+  # coalesce so a first-ever apply still works if security_password_hash isn't
+  # supplied - the placeholder is an obviously-invalid BCrypt hash (fails every
+  # login) rather than a real value baked into version control.
+  value = coalesce(var.security_password_hash, "$2a$10$0000000000000000000000CHANGE.ME.IN.SSM")
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 # --- IAM: least-privilege Lambda execution role ---
 resource "aws_iam_role" "lambda_exec" {
   name = "${local.name}-lambda-exec"
@@ -102,8 +133,8 @@ resource "aws_lambda_function" "app" {
 
   environment {
     variables = {
-      TURBOORDERS_SECURITY_USERNAME      = var.security_username
-      TURBOORDERS_SECURITY_PASSWORD_HASH = var.security_password_hash
+      TURBOORDERS_SECURITY_USERNAME      = aws_ssm_parameter.security_username.value
+      TURBOORDERS_SECURITY_PASSWORD_HASH = aws_ssm_parameter.security_password_hash.value
       QUARKUS_DYNAMODB_AWS_REGION        = var.region
     }
   }

@@ -1,5 +1,12 @@
-# Copy to terraform.tfvars (gitignored) and fill in, or set the equivalent
+# Not needed for routine `terraform apply`/`scripts/deploy.sh` runs - these two
+# variables only seed the SSM Parameter Store parameters (see aws_ssm_parameter.security_*
+# in main.tf) the very first time they're created. After that, `lifecycle.ignore_changes`
+# means Terraform never overwrites whatever value is actually in SSM - rotate credentials
+# by editing the parameters' values in the AWS console/CLI instead.
+#
+# Copy to terraform.tfvars (gitignored) only if you want to override the bootstrap
+# defaults on a from-scratch `terraform apply`, or set the equivalent
 # TF_VAR_security_username / TF_VAR_security_password_hash env vars instead.
 
-security_username       = "turboorders"
-security_password_hash  = "$2a$10$replace-with-a-real-bcrypt-hash"
+security_username      = "turboorders"
+security_password_hash = "$2a$10$replace-with-a-real-bcrypt-hash"

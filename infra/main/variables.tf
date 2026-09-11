@@ -22,15 +22,23 @@ variable "image_tag" {
   default     = "latest"
 }
 
+# These two are ONLY used to seed the SSM Parameter Store parameters (see
+# aws_ssm_parameter.security_* in main.tf) the very first time they're created.
+# After that, `lifecycle.ignore_changes` on those resources means Terraform never
+# overwrites a value someone sets via the SSM console/CLI, and these variables stop
+# mattering - real day-to-day credential changes happen in SSM, not here. Defaults
+# exist so routine `terraform apply`/`scripts/deploy.sh` runs never need them.
 variable "security_username" {
-  description = "Basic Auth username, becomes the TURBOORDERS_SECURITY_USERNAME Lambda env var"
+  description = "Bootstrap-only initial value for the SSM username parameter - see comment above"
   type        = string
+  default     = "turboorders"
   sensitive   = true
 }
 
 variable "security_password_hash" {
-  description = "BCrypt hash of the Basic Auth password, becomes the TURBOORDERS_SECURITY_PASSWORD_HASH Lambda env var"
+  description = "Bootstrap-only initial value for the SSM password-hash parameter - see comment above"
   type        = string
+  default     = null
   sensitive   = true
 }
 

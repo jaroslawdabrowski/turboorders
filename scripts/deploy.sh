@@ -6,8 +6,11 @@
 #   2. cd infra/main && terraform init -backend-config="bucket=<state bucket from step 1>" \
 #        -backend-config="dynamodb_table=<lock table from step 1>" -backend-config="region=eu-central-1"
 #   3. terraform apply -target=aws_ecr_repository.app   (creates just the ECR repo)
-#   4. Set TF_VAR_security_username / TF_VAR_security_password_hash (see application.properties
-#      for how to generate a dev-style BCrypt hash), then run this script.
+#   4. Run this script. Basic Auth credentials are stored in SSM Parameter Store
+#      (see aws_ssm_parameter.security_* in infra/main/main.tf) - no TF_VAR needed
+#      for routine deploys. Rotate the actual username/password by editing those
+#      parameters' values in the AWS console (or CLI), then just re-run this script
+#      to push the new value into the Lambda's environment.
 #
 # Every subsequent deploy: scripts/build.sh && scripts/deploy.sh
 set -euo pipefail

@@ -193,6 +193,26 @@
       "Effect": "Allow",
       "Action": "logs:DescribeLogGroups",
       "Resource": "*"
+    },
+    {
+      "Sid": "SsmSecurityParameters",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:DeleteParameter",
+        "ssm:AddTagsToResource",
+        "ssm:RemoveTagsFromResource",
+        "ssm:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:ssm:eu-central-1:814478897174:parameter/turboorders-*"
+    },
+    {
+      "Sid": "SsmDescribe",
+      "Effect": "Allow",
+      "Action": "ssm:DescribeParameters",
+      "Resource": "*"
     }
   ]
 }

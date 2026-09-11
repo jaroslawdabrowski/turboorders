@@ -43,10 +43,6 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-amazon-lambda-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-security</artifactId>
         </dependency>
         <dependency>
@@ -151,6 +147,28 @@
                 <skipITs>false</skipITs>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
             </properties>
+        </profile>
+        <profile>
+            <!--
+              quarkus-amazon-lambda-http lives in its own profile, not the main
+              dependency list, on purpose: its dev-mode poll loop and Quinoa's
+              live-coding proxy both register the same io.quarkus.runtime.ValueRegistry
+              key ("quarkus.http.local-base-uri"), and the registry throws
+              IllegalArgumentException: Key already registered on the very first
+              `quarkus:dev` boot - a genuine upstream collision between the two
+              extensions in dev mode (reproduced on a clean environment against
+              Quarkus platform 3.39.2 and 3.39.3 alike). Since it's the poll loop
+              specifically, `./mvnw test` is unaffected (Quinoa's live-coding proxy
+              only activates in dev mode). Activate with `-Plambda` only when
+              packaging for deployment - see scripts/build.sh.
+            -->
+            <id>lambda</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>quarkus-amazon-lambda-http</artifactId>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>

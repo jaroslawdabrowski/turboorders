@@ -41,6 +41,8 @@ nb-configuration.xml
 
 # Plugin directory
 /.quarkus/cli/plugins/
+# Claude Code session state
+/.claude/
 # TLS Certificates
 .certs/
 

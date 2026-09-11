@@ -13,10 +13,10 @@ Code and comments are in English. The UI is bilingual (Polish/English) via `@ngx
 ## Commands
 
 Backend (run from the repo root):
-- `./mvnw quarkus:dev` - dev mode; Quinoa also runs `ng serve` and proxies frontend requests; `quarkus-amazon-dynamodb`'s Dev Services auto-starts a local DynamoDB (via a Localstack testcontainer) - no manual docker-compose needed.
-- `./mvnw test` - full backend test suite (also exercises the Dev Services DynamoDB and the Lambda mock event server via `@QuarkusTest`).
+- `./mvnw quarkus:dev` - dev mode; Quinoa also runs `ng serve` and proxies frontend requests; `quarkus-amazon-dynamodb`'s Dev Services auto-starts a local DynamoDB (via a Localstack testcontainer) - no manual docker-compose needed. **Do not add `-Plambda` here** - see "Dev mode vs. the Lambda extension" below.
+- `./mvnw test` - full backend test suite (also exercises the Dev Services DynamoDB via `@QuarkusTest`).
 - `./mvnw test -Dtest=GreetingResourceTest` - single test class; `-Dtest=ClassName#methodName` for a single method.
-- `./mvnw package` - builds the app. Produces `target/turboorders-*-runner.jar` + `target/lib/` (legacy-jar layout) **and** `target/function.zip`, the flattened classpath archive the Lambda container image is built from.
+- `./mvnw package -Plambda` - builds the deployable app. Produces `target/turboorders-*-runner.jar` + `target/lib/` (legacy-jar layout) **and** `target/function.zip`, the flattened classpath archive the Lambda container image is built from. The `lambda` profile is what actually pulls in `quarkus-amazon-lambda-http` - see below for why it's not a plain dependency. `scripts/build.sh` already passes `-Plambda`.
 
 Frontend (run from `src/main/webui/`, only needed standalone - normally Quinoa drives it):
 - `npm start` / `ng serve` - dev server on `:4200` (no working backend behind `/api` unless Quarkus is also running).
@@ -50,6 +50,12 @@ platform/security/         Basic Auth, cross-cutting, outside the greeting hexag
 
 When adding a real bounded context (orders, etc.), follow `greeting/`'s shape: domain records with no framework annotations, a `port/in` interface per use case, an `application` service implementing it, and adapters that depend inward. Add `port/out` only once a context actually needs an external dependency (a repository, an external API) - `greeting` doesn't, so it has none.
 
+### Dev mode vs. the Lambda extension
+
+**`quarkus-amazon-lambda-http` is a Maven profile (`-Plambda`), not a plain dependency** - deliberately, to work around a genuine bug in this exact extension combination. With it on the classpath, `./mvnw quarkus:dev` crashes on the very first boot with `IllegalArgumentException: Key already registered quarkus.http.local-base-uri` (immediately followed by a second one for `quarkus.http.port`), thrown from `io.quarkus.runtime.ValueRegistryImpl`. Root cause: the Lambda extension's dev-mode poll loop (`AbstractLambdaPollLoop.startPollLoop`) and Quinoa's live-coding forward proxy (`ForwardedDevProcessor`, only active in dev mode) both register the same well-known value-registry keys unconditionally, with no guard against a key already being set - confirmed reproducible on a fully clean environment (no stale processes/containers) and on two separate Quarkus platform versions (3.39.2 and 3.39.3), so it isn't leftover local state or a version fluke. `./mvnw test` never hits it because Quinoa's forward proxy doesn't activate outside dev mode.
+
+Keeping the extension out of the default dependency set fixes this entirely - `quarkus:dev` and `./mvnw test` both run clean. It only needs to be present when actually packaging for Lambda deployment, hence `-Plambda` (see `scripts/build.sh`). **Don't move `quarkus-amazon-lambda-http` back into the main `<dependencies>` block** without re-verifying this collision is fixed upstream first.
+
 ### Security
 
 Single shared user, Basic Auth, no roles - `BasicAuthIdentityProvider` (`platform/security/`) validates against `turboorders.security.username` / `turboorders.security.password-hash` (BCrypt) and builds the identity with `QuarkusSecurityIdentity.builder()` directly rather than a hand-rolled `SecurityIdentity` implementation. `quarkus.http.auth.permission.authenticated.paths=/api/*` gates all API routes; the static frontend is unauthenticated (the login page itself has to load before there's anything to authenticate with).
@@ -60,7 +66,7 @@ Single shared user, Basic Auth, no roles - `BasicAuthIdentityProvider` (`platfor
 
 ### AWS Lambda packaging
 
-The `quarkus-amazon-lambda-http` extension **requires `quarkus.package.jar.type=legacy-jar`** (the default) - forcing `fast-jar` fails the build with an explicit error from `FunctionZipProcessor`. Don't "fix" the packaging type if it looks inconsistent with other Quarkus projects; legacy-jar + `target/function.zip` is correct here. `src/main/docker/Dockerfile.lambda` builds the container image by unzipping `function.zip` straight into `/var/task` on the AWS `public.ecr.aws/lambda/java:21` base image, with `io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest` as the handler. `.dockerignore` allowlists `target/function.zip` explicitly - it excludes everything else under `target/` by default.
+Build with `./mvnw package -Plambda` (see "Dev mode vs. the Lambda extension" above for why the extension is profile-gated). The `quarkus-amazon-lambda-http` extension **requires `quarkus.package.jar.type=legacy-jar`** (the default) - forcing `fast-jar` fails the build with an explicit error from `FunctionZipProcessor`. Don't "fix" the packaging type if it looks inconsistent with other Quarkus projects; legacy-jar + `target/function.zip` is correct here. `src/main/docker/Dockerfile.lambda` builds the container image by unzipping `function.zip` straight into `/var/task` on the AWS `public.ecr.aws/lambda/java:21` base image, with `io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest` as the handler. `.dockerignore` allowlists `target/function.zip` explicitly - it excludes everything else under `target/` by default.
 
 Test the container locally with the Lambda base image's built-in RIE before deploying: `docker run -p 9000:8080 <image>`, then `POST http://localhost:9000/2015-03-31/functions/function/invocations` with a JSON body shaped like an API Gateway v2 / Function URL event (`version`, `rawPath`, `headers`, `requestContext.http.{method,path}`, `isBase64Encoded`).
 

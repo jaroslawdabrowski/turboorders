@@ -19,7 +19,7 @@
           <p class="error">{{ errorKey() | translate }}</p>
         }
 
-        <button mat-flat-button type="submit" [disabled]="submitting()">{{ 'login.submit' | translate }}</button>
+        <button mat-flat-button type="submit" class="submit-button" [disabled]="submitting()">{{ 'login.submit' | translate }}</button>
       </form>
     </mat-card-content>
   </mat-card>

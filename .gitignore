@@ -69,5 +69,7 @@ lerna-debug.log*
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+*.tfplan
+.deploy.tfplan
 crash.log
 crash.*.log

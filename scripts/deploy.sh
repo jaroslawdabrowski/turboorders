@@ -16,8 +16,19 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INFRA_DIR="$REPO_ROOT/infra/main"
 
 IMAGE_NAME="${IMAGE_NAME:-turboorders}"
-IMAGE_TAG="${IMAGE_TAG:-latest}"
 AWS_REGION="${AWS_REGION:-eu-central-1}"
+
+# Match whatever unique tag scripts/build.sh generated (see its comment for why
+# reusing a fixed tag like "latest" across deploys silently skips the Lambda update).
+IMAGE_TAG="${IMAGE_TAG:-}"
+if [ -z "$IMAGE_TAG" ]; then
+  if [ -f "$REPO_ROOT/target/.image-tag" ]; then
+    IMAGE_TAG="$(cat "$REPO_ROOT/target/.image-tag")"
+  else
+    echo "No IMAGE_TAG set and target/.image-tag not found - run scripts/build.sh first." >&2
+    exit 1
+  fi
+fi
 
 cd "$INFRA_DIR"
 ECR_REPOSITORY_URL="$(terraform output -raw ecr_repository_url)"
@@ -30,7 +41,9 @@ docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
 docker push "${ECR_REPOSITORY_URL}:${IMAGE_TAG}"
 
 echo "==> Applying Terraform (creates/updates the Lambda function to use the new image)"
-terraform apply -var="image_tag=${IMAGE_TAG}"
+terraform plan -input=false -var="image_tag=${IMAGE_TAG}" -out=.deploy.tfplan
+terraform apply -input=false .deploy.tfplan
+rm -f .deploy.tfplan
 
 echo "==> Deployed. Function URL:"
 terraform output -raw function_url

@@ -1,8 +1,12 @@
-<mat-toolbar color="primary">
-  <span class="logo">TO</span>
-  <span class="title">TurboOrders</span>
+<mat-toolbar class="app-toolbar">
+  <span class="brand">
+    <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 2C12.5 7.2 12.9 11.1 22 12C12.9 12.9 12.5 16.8 12 22C11.5 16.8 11.1 12.9 2 12C11.1 11.1 11.5 7.2 12 2Z" fill="currentColor"/>
+    </svg>
+    <span class="brand-name to-serif">TurboOrders</span>
+  </span>
   <span class="spacer"></span>
-  <button mat-button [matMenuTriggerFor]="languageMenu">{{ currentLanguage().toUpperCase() }}</button>
+  <button mat-button class="lang-button" [matMenuTriggerFor]="languageMenu">{{ currentLanguage().toUpperCase() }}</button>
   <mat-menu #languageMenu="matMenu">
     @for (language of languages; track language) {
       <button mat-menu-item (click)="changeLanguage(language)">{{ language.toUpperCase() }}</button>

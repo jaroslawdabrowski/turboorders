@@ -1,15 +1,27 @@
 .home-page {
   display: flex;
   justify-content: center;
-  padding-block: 3rem;
+  padding-block: 4rem;
+}
+
+mat-card {
+  background: var(--to-cream-elevated);
+  border-top: 3px solid var(--to-gold);
+  box-shadow: 0 8px 24px rgba(43, 36, 31, 0.08);
+  min-width: 320px;
 }
 
 .greeting {
-  font-size: 1.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--to-ink);
   margin: 0;
 }
 
 .status {
-  color: var(--mat-sys-outline);
-  margin: 0.5rem 0 0;
+  color: var(--to-ink-soft);
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
 }

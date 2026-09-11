@@ -7,6 +7,16 @@
 .login-card {
   width: 100%;
   max-width: 360px;
+  background: var(--to-cream-elevated);
+  border-top: 3px solid var(--to-gold);
+  box-shadow: 0 8px 24px rgba(43, 36, 31, 0.08);
+
+  mat-card-title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--to-ink);
+  }
 
   form {
     display: flex;
@@ -21,5 +31,12 @@
   .error {
     color: var(--mat-sys-error);
     margin: 0;
+  }
+
+  .submit-button {
+    margin-top: 0.5rem;
+    background: var(--to-ink);
+    color: var(--to-cream);
+    letter-spacing: 0.06em;
   }
 }

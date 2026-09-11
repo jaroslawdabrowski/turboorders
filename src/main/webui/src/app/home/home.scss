@@ -1,0 +1,15 @@
+.home-page {
+  display: flex;
+  justify-content: center;
+  padding-block: 3rem;
+}
+
+.greeting {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.status {
+  color: var(--mat-sys-outline);
+  margin: 0.5rem 0 0;
+}

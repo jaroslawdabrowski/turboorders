@@ -1,0 +1,13 @@
+{
+  "login": {
+    "title": "Login",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Log in",
+    "error": "Invalid username or password"
+  },
+  "home": {
+    "greeting": "Hello, here is TurboOrders",
+    "backendConnected": "Connected to backend"
+  }
+}

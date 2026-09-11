@@ -1,0 +1,5 @@
+# Copy to terraform.tfvars (gitignored) and fill in, or set the equivalent
+# TF_VAR_security_username / TF_VAR_security_password_hash env vars instead.
+
+security_username       = "turboorders"
+security_password_hash  = "$2a$10$replace-with-a-real-bcrypt-hash"

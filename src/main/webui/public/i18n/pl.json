@@ -1,0 +1,13 @@
+{
+  "login": {
+    "title": "Logowanie",
+    "username": "Nazwa użytkownika",
+    "password": "Hasło",
+    "submit": "Zaloguj",
+    "error": "Nieprawidłowa nazwa użytkownika lub hasło"
+  },
+  "home": {
+    "greeting": "Cześć, tu TurboOrders",
+    "backendConnected": "Połączono z backendem"
+  }
+}

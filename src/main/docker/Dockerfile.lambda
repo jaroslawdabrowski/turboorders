@@ -1,0 +1,9 @@
+# Builds the Lambda container image from an already-built app (`./mvnw package`,
+# which produces target/function.zip via the amazon-lambda-http extension).
+# See scripts/build.sh for the two-step build.
+FROM public.ecr.aws/lambda/java:21
+
+COPY target/function.zip /function.zip
+RUN cd /var/task && jar xf /function.zip && rm -f /function.zip
+
+CMD ["io.quarkus.amazon.lambda.runtime.QuarkusStreamHandler::handleRequest"]

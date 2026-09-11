@@ -1,0 +1,10 @@
+<div class="home-page">
+  <mat-card>
+    <mat-card-content>
+      <p class="greeting">{{ 'home.greeting' | translate }}</p>
+      @if (backendReachable()) {
+        <p class="status">{{ 'home.backendConnected' | translate }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

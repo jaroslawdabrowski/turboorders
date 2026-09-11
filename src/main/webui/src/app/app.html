@@ -1,0 +1,13 @@
+<mat-toolbar color="primary">
+  <span class="logo">TO</span>
+  <span class="title">TurboOrders</span>
+  <span class="spacer"></span>
+  <button mat-button [matMenuTriggerFor]="languageMenu">{{ currentLanguage().toUpperCase() }}</button>
+  <mat-menu #languageMenu="matMenu">
+    @for (language of languages; track language) {
+      <button mat-menu-item (click)="changeLanguage(language)">{{ language.toUpperCase() }}</button>
+    }
+  </mat-menu>
+</mat-toolbar>
+
+<router-outlet />

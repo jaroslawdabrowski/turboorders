@@ -1,0 +1,26 @@
+<div class="login-page">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>{{ 'login.title' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'login.username' | translate }}</mat-label>
+          <input matInput name="username" [ngModel]="username()" (ngModelChange)="username.set($event)" autocomplete="username" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'login.password' | translate }}</mat-label>
+          <input matInput type="password" name="password" [ngModel]="password()" (ngModelChange)="password.set($event)" autocomplete="current-password" />
+        </mat-form-field>
+
+        @if (errorKey()) {
+          <p class="error">{{ errorKey() | translate }}</p>
+        }
+
+        <button mat-flat-button type="submit" [disabled]="submitting()">{{ 'login.submit' | translate }}</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

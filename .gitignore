@@ -43,6 +43,9 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 # Claude Code session state
 /.claude/
+# Playwright MCP output (should land in --output-dir instead, but a stale
+# server process from before .mcp.json set that flag can still write here)
+/.playwright-mcp/
 # TLS Certificates
 .certs/
 

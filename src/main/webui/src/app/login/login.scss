@@ -11,6 +11,10 @@
   border-top: 3px solid var(--to-gold);
   box-shadow: 0 8px 24px rgba(43, 36, 31, 0.08);
 
+  mat-card-header {
+    padding-bottom: 1rem;
+  }
+
   mat-card-title {
     font-family: "Playfair Display", Georgia, serif;
     font-weight: 600;

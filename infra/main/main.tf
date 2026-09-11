@@ -123,3 +123,19 @@ resource "aws_lambda_permission" "public_url" {
   principal              = "*"
   function_url_auth_type = "NONE"
 }
+
+# AWS requires BOTH InvokeFunctionUrl and InvokeFunction on the resource policy for a
+# NONE-auth Function URL to work (since Oct 2025) - see the aws_lambda_permission
+# comment below for why this can't be scoped to "via function URL only" yet.
+resource "aws_lambda_permission" "public_invoke" {
+  statement_id  = "AllowPublicInvokeFunction"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.app.function_name
+  principal     = "*"
+  # AWS's recommended policy also scopes this to Condition lambda:InvokedViaFunctionUrl=true,
+  # but aws_lambda_permission doesn't expose that condition key yet
+  # (https://github.com/hashicorp/terraform-provider-aws/issues/44829), so this grants
+  # public lambda:InvokeFunction broadly, not just via the Function URL. Basic Auth inside
+  # the app (platform/security/) is the actual access control either way - this is a known,
+  # accepted gap until the provider adds support.
+}
